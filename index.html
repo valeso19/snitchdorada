@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Snitch Dorada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+<style>
+html, body { margin: 0; }
+[hidden] { display: none !important; }
+/* Concepto: una noche de misión. Cielo de estrellas, un pergamino que se desenrolla con cada pista
+   y una Snitch dorada que cruza la pantalla cuando el código es correcto. Todo el brillo está en el dorado. */
+:root {
+  --bg: #07061a;
+  --night: #15103c;
+  --ink: #f4ecd6;
+  --muted: #aaa3c6;
+  --gold: #f0c24e;
+  --gold-hi: #fff0a8;
+  --gold-lo: #b8861b;
+  --line: #3a3560;
+  --parch: #e9dcb6;
+  --parch-ink: #2b1d0e;
+  --bad: #ff9a90;
+  --display: 'Cinzel Decorative', 'Trajan Pro', Georgia, serif;
+  --body: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(120% 70% at 50% -10%, #251b63 0%, rgba(7, 6, 26, 0) 60%);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.45;
+  min-height: 100vh;
+  padding-block: 0 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+}
+#sky, #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#sky { z-index: 0; }
+#fx { z-index: 40; }
+#app { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
+
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; min-height: 56px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: .95rem; color: var(--gold); letter-spacing: .06em; }
+button, input { font-family: var(--body); font-size: 1rem; }
+button { cursor: pointer; color: var(--ink); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+.ghost { min-height: 44px; padding: 0 14px; background: transparent; border: 1px solid var(--line); border-radius: 4px; font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.ghost:hover { border-color: var(--gold); color: var(--ink); }
+.ghost.warn { border-color: #d0605a; color: var(--bad); }
+
+.cta { display: block; width: 100%; min-height: 56px; padding: 0 22px; border: 0; border-radius: 4px; background: linear-gradient(180deg, var(--gold-hi), var(--gold) 45%, var(--gold-lo)); color: #1b1203; font-family: var(--display); font-weight: 900; font-size: 1.05rem; letter-spacing: .05em; box-shadow: 0 0 34px -4px rgba(240, 194, 78, .7); transition: transform .12s, filter .2s; }
+.cta:hover { filter: brightness(1.08); }
+.cta:active { transform: scale(.98); }
+.cta:disabled { filter: grayscale(.7) brightness(.7); box-shadow: none; cursor: not-allowed; }
+
+.kicker { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+.title { font-family: var(--display); font-weight: 900; line-height: 1.08; margin: 0; text-wrap: balance;
+  color: var(--gold); background: linear-gradient(100deg, #b8861b 10%, #fff0a8 35%, #f0c24e 55%, #b8861b 90%); background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 5s linear infinite; }
+@keyframes shimmer { to { background-position: -220% 0; } }
+
+/* Snitch */
+.snitch { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 0 14px rgba(255, 200, 70, .75)); }
+.flap { transform-origin: 84px 58px; animation: flap .2s ease-in-out infinite alternate; }
+@keyframes flap { from { transform: rotate(14deg); } to { transform: rotate(-28deg); } }
+.snitch .core { animation: bob 1.6s ease-in-out infinite alternate; transform-origin: 100px 60px; }
+@keyframes bob { from { transform: translateY(-2px); } to { transform: translateY(3px); } }
+
+/* Intro */
+.hero { display: grid; gap: 22px; padding-top: 6px; text-align: center; }
+.hero .stage { position: relative; height: 210px; overflow: hidden; }
+.flyer { position: absolute; left: 50%; top: 50%; width: 230px; margin: -70px 0 0 -115px; animation: fly 11s ease-in-out infinite; }
+@keyframes fly {
+  0% { transform: translate(-70px, 10px) rotate(-4deg); }
+  20% { transform: translate(60px, -40px) rotate(5deg); }
+  40% { transform: translate(90px, 30px) rotate(-3deg); }
+  60% { transform: translate(-20px, 50px) rotate(6deg); }
+  80% { transform: translate(-90px, -25px) rotate(-5deg); }
+  100% { transform: translate(-70px, 10px) rotate(-4deg); }
+}
+.hero h1 { font-size: clamp(2.1rem, 9vw, 3.2rem); }
+.hero .lead { margin: 0; font-size: 1.3rem; text-wrap: pretty; }
+.hero .lead em { color: var(--gold-hi); }
+.hero .facts { margin: 0; font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+/* Progreso */
+.trail { list-style: none; margin: 4px 0 20px; padding: 0; display: flex; align-items: center; }
+.trail li { position: relative; flex: 1; display: flex; justify-content: center; }
+.trail li::before { content: ""; position: absolute; right: 50%; left: -50%; top: 50%; height: 2px; background: var(--line); transition: background .6s; }
+.trail li:first-child::before { display: none; }
+.trail li.done::before, .trail li.cur::before { background: var(--gold); }
+.node { position: relative; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 2px solid var(--line); font-family: var(--display); font-weight: 700; font-size: .85rem; color: var(--muted); z-index: 1; }
+.trail li.done .node { background: var(--gold); border-color: var(--gold-hi); color: #1b1203; box-shadow: 0 0 16px rgba(240, 194, 78, .6); }
+.trail li.cur .node { border-color: var(--gold-hi); color: var(--gold-hi); animation: ping 1.6s ease-out infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255, 240, 168, .7); } 100% { box-shadow: 0 0 0 14px rgba(255, 240, 168, 0); } }
+
+/* Pergamino */
+.scroll { position: relative; margin: 0 0 20px; filter: drop-shadow(0 18px 28px rgba(0, 0, 0, .55)); }
+.scroll::before, .scroll::after { content: ""; display: block; height: 18px; border-radius: 9px; background: linear-gradient(180deg, #8a6a33, #d8bd7c 45%, #6d4f21); position: relative; z-index: 2; }
+.paper { position: relative; margin: -6px 10px; padding: 26px 22px 24px; color: var(--parch-ink); background: linear-gradient(180deg, #efe3c0, #e2d1a2); box-shadow: inset 0 0 44px rgba(120, 80, 20, .35); animation: unroll 1.1s cubic-bezier(.3, .8, .3, 1) both; }
+@keyframes unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+.paper .kicker { color: #7a5413; }
+.paper h2 { font-family: var(--display); font-weight: 700; font-size: 1.55rem; line-height: 1.15; margin: 6px 0 14px; color: #3b2508; text-wrap: balance; }
+.lines p { margin: 0 0 10px; font-size: 1.22rem; font-style: italic; line-height: 1.5; opacity: 0; animation: lineIn .8s ease-out forwards; animation-delay: calc(.7s + var(--i) * .6s); }
+@keyframes lineIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.holder { margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed rgba(60, 40, 10, .45); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 1rem; opacity: 0; animation: lineIn .8s ease-out forwards; animation-delay: calc(.9s + var(--n) * .6s); }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 3px; background: #3b2508; color: #f1e4be; font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+
+/* Código */
+.gate { display: grid; gap: 10px; }
+.gate label { font-size: .8rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.gate input { width: 100%; min-height: 60px; padding: 0 14px; background: rgba(0, 0, 0, .4); border: 1px solid var(--gold-lo); border-radius: 4px; color: var(--gold-hi); font-family: var(--display); font-weight: 700; font-size: 1.4rem; letter-spacing: .14em; text-align: center; text-transform: uppercase; }
+.gate input::placeholder { color: #6c6490; letter-spacing: .1em; font-size: 1rem; font-family: var(--body); font-weight: 400; text-transform: none; }
+.gate input:focus { box-shadow: 0 0 0 3px rgba(240, 194, 78, .25), 0 0 28px rgba(240, 194, 78, .25); }
+.gate input.shake { animation: shake .45s; border-color: var(--bad); }
+@keyframes shake { 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+.msg { min-height: 1.5em; margin: 0; text-align: center; font-size: 1.05rem; }
+.msg.bad { color: var(--bad); }
+.msg.good { color: var(--gold-hi); font-weight: 600; }
+.helper { margin: 0; text-align: center; color: var(--muted); font-size: .98rem; }
+.extra { display: grid; gap: 10px; margin-top: 10px; justify-items: center; }
+.hint { margin: 0; padding: 12px 14px; border: 1px dashed var(--gold-lo); border-radius: 4px; color: var(--gold-hi); font-style: italic; text-align: center; animation: lineIn .6s ease-out both; }
+
+/* Final */
+.finale { position: relative; display: grid; gap: 14px; text-align: center; justify-items: center; padding-top: 8px; }
+.rays { position: absolute; left: 50%; top: 130px; width: 640px; height: 640px; margin: -320px 0 0 -320px; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(240, 194, 78, .22) 0 6deg, rgba(240, 194, 78, 0) 6deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 5%, transparent 68%); mask-image: radial-gradient(circle, #000 5%, transparent 68%);
+  animation: spin 40s linear infinite, fadeIn 2s ease-out both; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.big { width: min(300px, 78vw); animation: arrive 2.2s cubic-bezier(.2, .9, .3, 1.1) both; }
+@keyframes arrive { 0% { opacity: 0; transform: translate(-60vw, 120px) scale(.2) rotate(-14deg); } 55% { opacity: 1; transform: translate(14vw, -30px) scale(.9) rotate(6deg); } 100% { opacity: 1; transform: none; } }
+.finale .title { font-size: clamp(1.9rem, 8.4vw, 2.9rem); animation: shimmer 5s linear infinite, rise 1s .9s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+.bday { margin: 0; font-size: 1.35rem; animation: rise 1s 1.3s ease-out both; }
+.bday .n15 { font-family: var(--display); font-weight: 900; font-size: 2.1rem; color: var(--gold-hi); text-shadow: 0 0 24px var(--gold); padding: 0 .1em; }
+.time { margin: 0; color: var(--muted); animation: rise 1s 1.7s ease-out both; }
+.fin-note { margin: 0; max-width: 30ch; font-style: italic; font-size: 1.2rem; animation: rise 1s 2.1s ease-out both; }
+.finale .ghost { margin-top: 8px; animation: rise 1s 2.5s ease-out both; }
+.flash { position: fixed; inset: 0; z-index: 50; pointer-events: none; background: radial-gradient(circle, #fff6c4 0%, #f0c24e 40%, rgba(240, 194, 78, 0) 75%); animation: flashOut 1.8s ease-out forwards; }
+@keyframes flashOut { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Snitch que cruza la pantalla */
+.zipper { position: fixed; left: 0; top: 28%; width: 130px; z-index: 45; pointer-events: none; opacity: 0; }
+.zipper.go { animation: zip 1.5s cubic-bezier(.45, 0, .3, 1) forwards; }
+@keyframes zip {
+  0% { opacity: 1; transform: translate(-30vw, 50px) rotate(8deg); }
+  30% { transform: translate(28vw, -50px) rotate(-6deg); }
+  60% { transform: translate(62vw, 40px) rotate(6deg); }
+  100% { opacity: 1; transform: translate(135vw, -40px) rotate(-4deg); }
+}
+
+footer { margin-top: 36px; display: flex; justify-content: center; }
+.scene { animation: sceneIn .7s ease-out both; }
+@keyframes sceneIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .flap { animation: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="goldBall" cx="38%" cy="32%" r="75%">
+      <stop offset="0" stop-color="#fff6c0"/><stop offset=".42" stop-color="#f3c548"/><stop offset="1" stop-color="#a87614"/>
+    </radialGradient>
+    <linearGradient id="wingGrad" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#e9bd4a"/><stop offset=".55" stop-color="#f7ecc8"/><stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+</svg>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="zipper" id="zip" aria-hidden="true"></div>
+
+<div id="app">
+  <header class="bar">
+    <span class="brand">La Snitch Dorada</span>
+    <button class="ghost" id="snd" type="button" aria-pressed="true">Sonido</button>
+  </header>
+  <main id="stage"></main>
+  <footer><button class="ghost" id="restart" type="button">Empezar de nuevo</button></footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'snitch-giuliana-v1';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+
+  /* Las palabras mágicas se guardan como huella, no como texto. */
+  var STAGES = [
+    { place: 'La entrada', title: 'La puerta grande', who: 'persona',
+      lines: ['La Snitch pasó volando por acá y nadie la vio parar.',
+              'Por mí se llega, por mí se parte. Soy tan amplia que casi parezco un castillo, y soy lo primero que se pisa al llegar.',
+              'Un guardián vigila mi puerta. Encontralo y pedile la palabra mágica.'],
+      holder: 'Un guardián te da el código',
+      hint: 'Es el primer lugar que se ve cuando se abre la puerta de la calle.',
+      h: '4e44e4b3f0217818' },
+    { place: 'La sala de TV', title: 'La ventana negra', who: 'lugar',
+      lines: ['Siguió el rastro dorado hasta un cuarto de historias.',
+              'Tengo una ventana negra que se ilumina, un control que siempre se pierde y almohadones para todos.',
+              'El pergamino está escondido bajo algo blando donde te sentás.'],
+      holder: 'El código está en un pergamino escondido',
+      hint: 'Es donde se mira una peli, y el sillón sabe más de lo que dice.',
+      h: '8de1252159099d16' },
+    { place: 'El comedor', title: 'El gran banquete', who: 'persona',
+      lines: ['La Snitch dio vueltas entre platos y vasos.',
+              'Acá se sirve el banquete, se canta el feliz cumpleaños y se sopla la vela. Mesa larga, muchas sillas, y alguien que atiende como un elfo doméstico.',
+              'Hablá con quien sirve el banquete: ese es quien guarda la palabra mágica.'],
+      holder: 'Quien sirve el banquete te da el código',
+      hint: 'Es la mesa donde se come todos juntos.',
+      h: 'b45f0764befccbe3' },
+    { place: 'La cocina', title: 'El caldero', who: 'lugar',
+      lines: ['Una poción hirviendo casi atrapa a la Snitch.',
+              'Ollas, hornos, cucharones y mucho olor rico. Acá se preparan las pociones de verdad.',
+              'El pergamino se esconde donde se guarda lo frío. Abrí con cuidado.'],
+      holder: 'El código está en un pergamino escondido',
+      hint: 'Hace frío adentro y se guarda la comida.',
+      h: '166f3c1b58e74b44' },
+    { place: 'El patio', title: 'El cielo abierto', who: 'persona',
+      lines: ['La Snitch buscó aire libre y se mandó para el fondo.',
+              'Mucho cielo, mucho espacio para correr y volar en escoba. Un jugador la persigue sin descanso.',
+              'Te va a poner a prueba. Cumplí su desafío y te dará la palabra mágica.'],
+      holder: 'Un jugador te da el código, pero antes un desafío',
+      hint: 'Es al aire libre, en la parte de atrás de la casa.',
+      h: 'b63932a41e475ed3' },
+    { place: 'El patio del frente', title: 'El último rincón', who: 'lugar',
+      lines: ['La Snitch se cansó de volar y se posó en el último rincón.',
+              'Salí al frente de la casa, donde está la vereda. Revisá entre las plantas y las macetas, y fijate en lo más escondido.',
+              'Ahí espera el cofre dorado. Su palabra mágica es la última.'],
+      holder: 'El código final está en el cofre dorado',
+      hint: 'Es al aire libre, pero del lado de la calle.',
+      h: '7deec14168a85e86' }
+  ];
+
+  var state = load();
+  function load() {
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY));
+      if (v && typeof v.screen === 'string' && Number.isFinite(v.stage)) return v;
+    } catch (e) {}
+    return { screen: 'intro', stage: 0, t0: 0, t1: 0 };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  /* ---------- Código ---------- */
+  function norm(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function hash(s, seed) {
+    var x = seed >>> 0;
+    for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; }
+    return ('00000000' + x.toString(16)).slice(-8);
+  }
+  function fingerprint(code) { var s = 'SNITCH15|' + norm(code); return hash(s, 2166136261) + hash(s, 0x9747b28c); }
+
+  /* ---------- Sonido ---------- */
+  var ac = null, soundOn = true;
+  function tone(f, t0, dur, type, vol) {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+      o.type = type || 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.09, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  function chimeOk() { [659, 784, 988, 1319].forEach(function (f, i) { tone(f, i * 0.09, 0.5, 'triangle', 0.1); }); }
+  function chimeBad() { tone(196, 0, 0.35, 'sawtooth', 0.05); tone(155, 0.12, 0.4, 'sawtooth', 0.05); }
+  function fanfare() { [523, 659, 784, 1047, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.16, 0.8, 'triangle', 0.11); }); }
+  $('#snd').addEventListener('click', function () {
+    soundOn = !soundOn;
+    this.setAttribute('aria-pressed', String(soundOn));
+    this.textContent = soundOn ? 'Sonido' : 'Silencio';
+  });
+
+  /* ---------- Snitch (SVG) ---------- */
+  var FEATHERS =
+    '<path d="M84 58C68 40 36 28 6 30C34 46 62 58 84 62Z"/>' +
+    '<path d="M84 58C66 46 34 40 4 48C32 56 62 62 84 62Z"/>' +
+    '<path d="M84 59C68 54 38 54 10 64C38 66 64 66 84 63Z"/>' +
+    '<path d="M84 60C70 62 46 68 24 82C48 78 68 72 84 64Z"/>';
+  function snitchSVG(extra) {
+    var wing = '<g fill="url(#wingGrad)" stroke="#9a741c" stroke-width=".8" stroke-linejoin="round"><g class="flap">' + FEATHERS + '</g></g>';
+    return '<svg class="snitch ' + (extra || '') + '" viewBox="0 0 200 120" aria-hidden="true" focusable="false">' +
+      '<g class="core">' +
+      '<g>' + wing + '</g>' +
+      '<g transform="translate(200 0) scale(-1 1)">' + wing + '</g>' +
+      '<circle cx="100" cy="60" r="22" fill="url(#goldBall)" stroke="#8a6212" stroke-width="1"/>' +
+      '<path d="M80 55C92 49 108 49 120 55" fill="none" stroke="rgba(90,60,0,.55)" stroke-width="1.2"/>' +
+      '<path d="M80 66C92 72 108 72 120 66" fill="none" stroke="rgba(90,60,0,.35)" stroke-width="1"/>' +
+      '<ellipse cx="92" cy="50" rx="7" ry="4" fill="rgba(255,255,255,.55)"/>' +
+      '</g></svg>';
+  }
+  $('#zip').innerHTML = snitchSVG();
+
+  /* ---------- Pantallas ---------- */
+  var stage = $('#stage');
+  var lockTimer = null, hintTimer = null, wrong = 0, busy = false;
+
+  function clearTimers() { clearInterval(lockTimer); clearInterval(hintTimer); }
+
+  function renderIntro() {
+    clearTimers();
+    stage.innerHTML =
+      '<section class="hero scene">' +
+        '<div class="stage"><div class="flyer">' + snitchSVG() + '</div></div>' +
+        '<p class="kicker">Los 15 de Giuliana</p>' +
+        '<h1 class="title">La Búsqueda de la Snitch Dorada</h1>' +
+        '<p class="lead">La Snitch escapó y se escondió en algún rincón de la casa. Seguí las pistas, encontrá a los guardianes y los pergaminos, conseguí las palabras mágicas y <em>atrapala</em> antes de que desaparezca.</p>' +
+        '<p class="facts">6 pistas · 6 palabras mágicas · 1 Snitch</p>' +
+        '<button class="cta" id="begin" type="button">Aceptar la misión</button>' +
+      '</section>';
+    $('#begin').addEventListener('click', function () {
+      state.screen = 'quest'; state.stage = 0; state.t0 = Date.now(); state.t1 = 0; save();
+      chimeOk(); renderQuest();
+    });
+  }
+
+  function trailHTML() {
+    var out = '';
+    for (var i = 0; i < 7; i++) {
+      var cls = i < state.stage ? 'done' : (i === state.stage ? 'cur' : '');
+      var label = i === 6 ? '✦' : (i < state.stage ? '✓' : String(i + 1));
+      out += '<li class="' + cls + '"><span class="node">' + label + '</span></li>';
+    }
+    return '<ol class="trail" aria-label="Pista ' + (state.stage + 1) + ' de 6">' + out + '</ol>';
+  }
+
+  function renderQuest() {
+    clearTimers(); wrong = 0; busy = false;
+    var s = STAGES[state.stage];
+    var lines = s.lines.map(function (t, i) { return '<p style="--i:' + i + '">' + t + '</p>'; }).join('');
+    stage.innerHTML =
+      '<section class="scene">' + trailHTML() +
+        '<article class="scroll"><div class="paper">' +
+          '<p class="kicker">Pista ' + (state.stage + 1) + ' de 6</p>' +
+          '<h2>' + s.title + '</h2>' +
+          '<div class="lines">' + lines + '</div>' +
+          '<p class="holder" style="--n:' + s.lines.length + '"><span class="badge">' + (s.who === 'persona' ? 'Persona' : 'Lugar') + '</span><span>' + s.holder + '</span></p>' +
+        '</div></article>' +
+        '<form class="gate" id="gate" autocomplete="off" novalidate>' +
+          '<label for="code">Palabra mágica</label>' +
+          '<input id="code" name="code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="24" placeholder="Una palabra y un número">' +
+          '<button class="cta" id="try" type="submit">Lanzar hechizo</button>' +
+          '<p class="msg" id="msg" role="status" aria-live="polite"></p>' +
+        '</form>' +
+        '<div class="extra"><button class="ghost" id="hintBtn" type="button" disabled>Pista extra</button><p class="hint" id="hint" hidden></p></div>' +
+      '</section>';
+    $('#gate').addEventListener('submit', onSubmit);
+    setupHint(s);
+    window.scrollTo(0, 0);
+  }
+
+  function setupHint(s) {
+    var btn = $('#hintBtn'), box = $('#hint'), left = 30;
+    btn.textContent = 'Pista extra en ' + left + ' s';
+    hintTimer = setInterval(function () {
+      left--;
+      if (left <= 0) { clearInterval(hintTimer); btn.disabled = false; btn.textContent = 'Pista extra'; }
+      else btn.textContent = 'Pista extra en ' + left + ' s';
+    }, 1000);
+    btn.addEventListener('click', function () {
+      box.textContent = s.hint; box.hidden = false; btn.hidden = true;
+    });
+  }
+
+  function onSubmit(e) {
+    e.preventDefault();
+    if (busy) return;
+    var input = $('#code'), msg = $('#msg'), btn = $('#try');
+    var val = input.value;
+    if (!norm(val)) { msg.className = 'msg bad'; msg.textContent = 'Escribí la palabra mágica primero.'; input.focus(); return; }
+    var s = STAGES[state.stage];
+    if (fingerprint(val) === s.h) {
+      busy = true; input.disabled = true; btn.disabled = true;
+      msg.className = 'msg good'; msg.textContent = '¡Hechizo correcto!';
+      var r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2);
+      zipAcross(); chimeOk();
+      var last = state.stage === STAGES.length - 1;
+      setTimeout(function () {
+        if (last) { state.screen = 'finale'; state.t1 = Date.now(); save(); renderFinale(true); }
+        else { state.stage++; save(); renderQuest(); }
+      }, last ? 1300 : 1700);
+    } else {
+      wrong++;
+      chimeBad();
+      input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+      msg.className = 'msg bad'; msg.textContent = 'Ese código no abre este hechizo. Probá de nuevo.';
+      input.select();
+      if (wrong >= 3) lockOut(input, btn, msg);
+    }
+  }
+
+  function lockOut(input, btn, msg) {
+    var left = 15;
+    input.disabled = true; btn.disabled = true;
+    msg.className = 'msg bad'; msg.textContent = 'Los hechizos se enfriaron. Esperá ' + left + ' s.';
+    clearInterval(lockTimer);
+    lockTimer = setInterval(function () {
+      left--;
+      if (left <= 0) {
+        clearInterval(lockTimer); wrong = 0; input.disabled = false; btn.disabled = false;
+        msg.textContent = 'Ya podés intentar de nuevo.'; msg.className = 'msg'; input.value = ''; input.focus();
+      } else msg.textContent = 'Los hechizos se enfriaron. Esperá ' + left + ' s.';
+    }, 1000);
+  }
+
+  function duration() {
+    var ms = Math.max(0, (state.t1 || Date.now()) - (state.t0 || Date.now()));
+    var m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+    return (m ? m + ' min ' : '') + s + ' s';
+  }
+
+  function renderFinale(first) {
+    clearTimers();
+    stage.innerHTML =
+      '<section class="finale">' +
+        '<div class="rays" aria-hidden="true"></div>' +
+        '<div class="big">' + snitchSVG() + '</div>' +
+        '<p class="kicker">Misión cumplida</p>' +
+        '<h1 class="title">¡Atrapaste la Snitch Dorada!</h1>' +
+        '<p class="bday">Feliz cumpleaños número <span class="n15">15</span>, Giuliana</p>' +
+        '<p class="time">Tardaste ' + duration() + ' en completar la misión.</p>' +
+        '<p class="fin-note">Quince años y toda la magia por delante.</p>' +
+        '<button class="ghost" id="again" type="button">Volver a ver la escena</button>' +
+      '</section>';
+    window.scrollTo(0, 0);
+    $('#again').addEventListener('click', function () { renderFinale(true); });
+    if (first) {
+      var fl = document.createElement('div'); fl.className = 'flash'; document.body.appendChild(fl);
+      setTimeout(function () { fl.remove(); }, 1900);
+      fanfare();
+      setTimeout(function () { confetti(); }, 1100);
+      setTimeout(function () { confetti(); }, 3200);
+    }
+  }
+
+  /* ---------- Reiniciar ---------- */
+  var rb = $('#restart'), rt = null;
+  rb.addEventListener('click', function () {
+    if (!rb.classList.contains('warn')) {
+      rb.classList.add('warn'); rb.textContent = '¿Seguro? Tocá otra vez';
+      rt = setTimeout(cancelRestart, 3500); return;
+    }
+    cancelRestart();
+    state = { screen: 'intro', stage: 0, t0: 0, t1: 0 }; save(); renderIntro(); window.scrollTo(0, 0);
+  });
+  function cancelRestart() { clearTimeout(rt); rb.classList.remove('warn'); rb.textContent = 'Empezar de nuevo'; }
+
+  /* ---------- Efectos ---------- */
+  var zip = $('#zip');
+  zip.addEventListener('animationend', function () { zip.classList.remove('go'); });
+  function zipAcross() { if (reduce) return; zip.classList.remove('go'); void zip.offsetWidth; zip.classList.add('go'); }
+
+  var fx = $('#fx'), fc = fx.getContext('2d'), parts = [], fxRaf = 0, W = 0, H = 0;
+  function sizeCanvas(c, ctx) {
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = Math.round(W * d); c.height = Math.round(H * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  var GOLDS = ['#fff0a8', '#f0c24e', '#ffd86b', '#ffffff'];
+  var PARTY = ['#f0c24e', '#fff0a8', '#ef5f58', '#6a9af0', '#43bf7c', '#ffffff'];
+  function burst(x, y) {
+    if (reduce) return;
+    for (var i = 0; i < 80; i++) {
+      var a = Math.random() * 6.2832, v = 2 + Math.random() * 6;
+      parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0.1, life: 0, max: 40 + Math.random() * 30, s: 1.5 + Math.random() * 2.5, c: GOLDS[i % GOLDS.length], t: 's' });
+    }
+    runFx();
+  }
+  function confetti() {
+    if (reduce) return;
+    for (var i = 0; i < 160; i++) {
+      parts.push({ x: Math.random() * W, y: -20 - Math.random() * H * 0.5, vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 4, g: 0.03, life: 0, max: 260 + Math.random() * 60, s: 5 + Math.random() * 6, a: Math.random() * 6, va: (Math.random() - 0.5) * 0.3, c: PARTY[i % PARTY.length], t: 'r' });
+    }
+    runFx();
+  }
+  function runFx() { if (!fxRaf) fxRaf = requestAnimationFrame(stepFx); }
+  function stepFx() {
+    fc.clearRect(0, 0, W, H);
+    parts = parts.filter(function (p) { return p.life < p.max && p.y < H + 30; });
+    parts.forEach(function (p) {
+      p.life++; p.x += p.vx; p.y += p.vy; p.vy += p.g;
+      if (p.t === 's') {
+        p.vx *= 0.98;
+        fc.globalAlpha = Math.max(0, 1 - p.life / p.max);
+        fc.globalCompositeOperation = 'lighter';
+        fc.fillStyle = p.c; fc.beginPath(); fc.arc(p.x, p.y, p.s, 0, 6.2832); fc.fill();
+      } else {
+        p.a += p.va; fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
+        fc.save(); fc.translate(p.x, p.y); fc.rotate(p.a); fc.fillStyle = p.c; fc.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * 0.6); fc.restore();
+      }
+    });
+    fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
+    if (parts.length) fxRaf = requestAnimationFrame(stepFx); else { fxRaf = 0; fc.clearRect(0, 0, W, H); }
+  }
+
+  /* Cielo */
+  var sky = $('#sky'), sc = sky.getContext('2d'), stars = [], shoot = null, skyRaf = 0, sw = 0, sh = 0;
+  function initSky() {
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    sw = window.innerWidth; sh = window.innerHeight;
+    sky.width = Math.round(sw * d); sky.height = Math.round(sh * d); sc.setTransform(d, 0, 0, d, 0, 0);
+    stars = [];
+    var n = Math.round(sw * sh / 7000);
+    for (var i = 0; i < n; i++) stars.push({ x: Math.random() * sw, y: Math.random() * sh, r: 0.4 + Math.random() * 1.3, ph: Math.random() * 6.28, sp: 0.01 + Math.random() * 0.03 });
+    if (reduce) drawSky(true);
+  }
+  function drawSky(once) {
+    sc.clearRect(0, 0, sw, sh);
+    stars.forEach(function (s) {
+      if (!once) s.ph += s.sp;
+      var a = 0.35 + 0.6 * (0.5 + 0.5 * Math.sin(s.ph));
+      sc.fillStyle = 'rgba(255,244,205,' + a.toFixed(3) + ')';
+      sc.beginPath(); sc.arc(s.x, s.y, s.r, 0, 6.2832); sc.fill();
+    });
+    if (!once) {
+      if (!shoot && Math.random() < 0.004) shoot = { x: Math.random() * sw * 0.8, y: Math.random() * sh * 0.4, l: 0 };
+      if (shoot) {
+        shoot.x += 9; shoot.y += 4.5; shoot.l++;
+        var g = sc.createLinearGradient(shoot.x, shoot.y, shoot.x - 90, shoot.y - 45);
+        g.addColorStop(0, 'rgba(255,240,168,.9)'); g.addColorStop(1, 'rgba(255,240,168,0)');
+        sc.strokeStyle = g; sc.lineWidth = 2; sc.beginPath(); sc.moveTo(shoot.x, shoot.y); sc.lineTo(shoot.x - 90, shoot.y - 45); sc.stroke();
+        if (shoot.l > 50) shoot = null;
+      }
+      skyRaf = requestAnimationFrame(function () { drawSky(false); });
+    }
+  }
+  function startSky() { cancelAnimationFrame(skyRaf); initSky(); if (!reduce) drawSky(false); }
+  var rz;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { startSky(); sizeCanvas(fx, fc); }, 150); });
+  startSky(); sizeCanvas(fx, fc);
+
+  /* Arranque */
+  if (state.screen === 'quest') renderQuest();
+  else if (state.screen === 'finale') renderFinale(false);
+  else renderIntro();
+})();
+</script>
+</body>
+</html>
